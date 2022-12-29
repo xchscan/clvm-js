@@ -30,7 +30,30 @@ fs.writeFileSync(browserDtsPath, 'export * from "..";\n');
 
 
 const packageJson = require("./package.json");
-fs.writeFileSync(path.join(distNpmDir, "package.json"), JSON.stringify(packageJson, null, 2));
+
+function mapTree(cb, node, path=[]) {
+  if (Array.isArray(node)) {
+    return node.map((leaf, branch) => mapTree(cb, leaf, [...path, branch]));
+  } else if (node && typeof node === "object") {
+    const newNode = {};
+    for (const [branch, leaf] of Object.entries(node)) {
+      newNode[branch] = mapTree(cb, leaf, [...path, branch]);
+    }
+    return newNode;
+  }
+  return cb(path, node);
+}
+
+const localPublishDir = './.dist/npm';
+const regexp = new RegExp(`^${localPublishDir.replace(/\./g, '\\.')}`)
+const localizedPathsPackageJson = mapTree((_path, val) => {
+  if (typeof val === "string" && regexp.test(val)) {
+    return val.replace(regexp, '.');
+  }
+  return val;
+}, packageJson);
+
+fs.writeFileSync(path.join(distNpmDir, "package.json"), JSON.stringify(localizedPathsPackageJson, null, 2));
 
 function copyFileToPublish(fileName){
   const srcPath = path.join(__dirname, fileName);

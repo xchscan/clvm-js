@@ -9,10 +9,11 @@
     "url": "https://github.com/Chia-Mine/clvm-js.git"
   },
   "bugs": "https://github.com/Chia-Mine/clvm-js/issues",
-  "main": "./index.js",
-  "typings": "./index.d.ts",
+  "main": "./.dist/npm/index.js",
+  "typings": "./.dist/npm/index.d.ts",
   "scripts": {
     "build": "node pre_build.js && tsc --sourcemap false && webpack",
+    "prepare": "npm run build",
     "test": "jest"
   },
   "keywords": [
