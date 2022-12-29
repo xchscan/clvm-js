@@ -1,4 +1,4 @@
-import {SExp, t, h, b, Bytes, getBLSModule, initialize, None, Tuple, list, str, repr} from "../src";
+import {SExp, t, h, b, Bytes, getBLSModule, initialize, None, list, str, repr} from "../src";
 import {CLVMObject} from "../src/CLVMObject";
 import {EvalError} from "../src/EvalError";
 import type {ModuleInstance} from "bls-signatures";
@@ -202,8 +202,8 @@ test("test_long_list", () => {
   const d = [...new Array(1000)].map(() => 1337);
   let v = SExp.to(d);
   for(let i=0;i<(1000-1);i++){
-    expect((v.as_pair() as Tuple<SExp, SExp>)[0].as_int()).toBe(d[i]);
-    v = (v.as_pair() as Tuple<SExp, unknown>)[1];
+    expect((v.as_pair() as [SExp, SExp])[0].as_int()).toBe(d[i]);
+    v = (v.as_pair() as [SExp, SExp])[1];
   }
   
   // expect(v.atom?.equal_to(SExp.null())).toBeTruthy(); // v.atom is `None`. In javascript, None is just a null and not implement `equal_to` function

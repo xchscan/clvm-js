@@ -1,6 +1,6 @@
 import {SExp, looks_like_clvm_object, convert_atom_to_bytes, isSExp} from "../src/SExp";
 import {CLVMObject, CLVMType} from "../src/CLVMObject";
-import {isBytes, isTuple, Tuple, b, Bytes, t} from "../src/__type_compatibility__";
+import {isBytes, isTuple, b, Bytes, t} from "../src/__type_compatibility__";
 import {None} from "../src/__python_types__";
 
 function validate_sexp(sexp: SExp){
@@ -13,7 +13,7 @@ function validate_sexp(sexp: SExp){
       const [v1, v2] = v.pair;
       expect(looks_like_clvm_object(v1)).toBeTruthy();
       expect(looks_like_clvm_object(v2)).toBeTruthy();
-      const [s1, s2] = v.as_pair() as Tuple<SExp, SExp>;
+      const [s1, s2] = v.as_pair() as [SExp, SExp];
       validate_stack.push(s1);
       validate_stack.push(s2);
     }
@@ -33,7 +33,7 @@ function print_leaves(tree: SExp): string {
   }
   
   let ret = "";
-  for(const i of tree.as_pair() as Tuple<SExp, SExp>){
+  for(const i of tree.as_pair() as [SExp, SExp]){
     ret = ret + print_leaves(i);
   }
   return ret;
@@ -49,7 +49,7 @@ function print_tree(tree: SExp): string {
   }
   
   let ret = "(";
-  for(const i of tree.as_pair() as Tuple<SExp, SExp>){
+  for(const i of tree.as_pair() as [SExp, SExp]){
     ret = ret + print_tree(i);
   }
   ret += ")";

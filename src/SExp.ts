@@ -1,7 +1,7 @@
 import {G1Element} from "bls-signatures";
 import {None, Optional} from "./__python_types__";
 import {CLVMObject, CLVMType} from "./CLVMObject";
-import {Bytes, isIterable, Tuple, t, Stream, isBytes, isTuple} from "./__type_compatibility__";
+import {Bytes, isIterable, t, Stream, isBytes, isTuple} from "./__type_compatibility__";
 import {bigint_from_bytes, bigint_to_bytes, int_from_bytes, int_to_bytes} from "./casts";
 import {sexp_to_stream} from "./serialize";
 import {as_javascript} from "./as_javascript";
@@ -16,7 +16,7 @@ export type CastableType = SExp
 | None
 | G1Element
 | CastableType[]
-| Tuple<CastableType, CastableType>
+| [CastableType, CastableType]
 ;
 
 export function looks_like_clvm_object(o: any): o is CLVMType {
@@ -66,7 +66,7 @@ const op_set_right = 2;
 const op_prepend_list = 3;
 type operations = typeof op_convert | typeof op_set_left | typeof op_set_right | typeof op_prepend_list;
 type op_target = number | None;
-type op_and_target = Tuple<operations, op_target>;
+type op_and_target = [operations, op_target];
 
 export function to_sexp_type(value: CastableType): CLVMType {
   let v: CastableType|undefined = value;
@@ -87,21 +87,18 @@ export function to_sexp_type(value: CastableType): CLVMType {
       
       v = stack.pop();
       if(isTuple(v)){
-        if(v.length !== 2){
-          throw new Error(`can't cast tuple of size ${v.length}`);
-        }
         const [left, right] = v;
         targetIndex = stack.length;
         stack.push(new CLVMObject(t(left, right)));
         
         if(!looks_like_clvm_object(right)){
-          stack.push(right);
+          stack.push(right as CastableType);
           ops.push(t(2, targetIndex)); // set right
           ops.push(t(0, None)); // convert
         }
         
         if(!looks_like_clvm_object(left)){
-          stack.push(left);
+          stack.push(left as CastableType);
           ops.push(t(1, targetIndex));
           ops.push(t(0, None));
         }
@@ -134,12 +131,12 @@ export function to_sexp_type(value: CastableType): CLVMType {
     if (op === op_set_left){ // set left
       stack[targetIndex] = new CLVMObject(t(
         new CLVMObject(stack.pop()),
-        ((stack[targetIndex] as CLVMType).pair as Tuple<any, any>)[1]
+        ((stack[targetIndex] as CLVMType).pair as [any, any])[1]
       ));
     }
     else if(op === op_set_right){ // set right
       stack[targetIndex] = new CLVMObject(t(
-        ((stack[targetIndex] as CLVMType).pair as Tuple<any, any>)[0],
+        ((stack[targetIndex] as CLVMType).pair as [any, any])[0],
         new CLVMObject(stack.pop())
       ));
     }
@@ -172,7 +169,7 @@ export function to_sexp_type(value: CastableType): CLVMType {
  */
 export class SExp implements CLVMType {
   private readonly _atom: Optional<Bytes> = None;
-  private readonly _pair: Optional<Tuple<any, any>> = None;
+  private readonly _pair: Optional<[any, any]> = None;
   
   get atom(){
     return this._atom;
@@ -207,7 +204,7 @@ export class SExp implements CLVMType {
     this._pair = v.pair;
   }
   
-  public as_pair(): Tuple<SExp, SExp>|None {
+  public as_pair(): [SExp, SExp]|None {
     const pair = this.pair;
     if(pair === None){
       return pair;
@@ -268,9 +265,9 @@ export class SExp implements CLVMType {
   public equal_to(other: any/* CastableType */): boolean {
     try{
       other = SExp.to(other);
-      const to_compare_stack = [t(this, other)] as Array<Tuple<SExp, SExp>>;
+      const to_compare_stack = [t(this, other)] as Array<[SExp, SExp]>;
       while(to_compare_stack.length){
-        const [s1, s2] = (to_compare_stack.pop() as Tuple<SExp, SExp>);
+        const [s1, s2] = (to_compare_stack.pop() as [SExp, SExp]);
         const p1 = s1.as_pair();
         if(p1){
           const p2 = s2.as_pair();

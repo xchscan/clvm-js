@@ -1,10 +1,10 @@
 import {CastableType, SExp} from "./SExp";
-import {Bytes, Tuple, t, isList, isBytes} from "./__type_compatibility__";
+import {Bytes, t, isList, isBytes} from "./__type_compatibility__";
 
 export type TOpStack = Array<(op_stack: TOpStack, val_stack: TValStack) => unknown>;
-export type TValStack = Array<Bytes|SExp|SExp[]|Tuple<SExp, SExp>>;
+export type TValStack = Array<Bytes|SExp|SExp[]|[SExp, SExp]>;
 export type TToSexpF = (arg: CastableType) => SExp;
-export type TToJavascript = Bytes | Bytes[] | Tuple<TToJavascript, TToJavascript> | TToJavascript[];
+export type TToJavascript = Bytes | Bytes[] | [TToJavascript, TToJavascript] | TToJavascript[];
 
 
 export function as_javascript(sexp: SExp){

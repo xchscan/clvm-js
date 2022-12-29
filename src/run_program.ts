@@ -2,7 +2,7 @@ import {None} from "./__python_types__";
 import {SExp} from "./SExp";
 import {TToSexpF} from "./as_javascript";
 import {CLVMType, isAtom, isCons} from "./CLVMObject";
-import {Bytes, Tuple, t} from "./__type_compatibility__";
+import {Bytes, t} from "./__type_compatibility__";
 import {
   APPLY_COST,
   PATH_LOOKUP_BASE_COST,
@@ -46,11 +46,11 @@ export function run_program(
   operator_lookup: TOperatorDict,
   max_cost: number|None = None,
   pre_eval_f: TPreEvalF|None = None,
-): Tuple<number, CLVMType>{
+): [number, CLVMType] {
   program = SExp.to(program);
   const pre_eval_op = pre_eval_f ? to_pre_eval_op(pre_eval_f, SExp.to) : None;
   
-  function traverse_path(sexp: SExp, env: SExp): Tuple<number, SExp> {
+  function traverse_path(sexp: SExp, env: SExp): [number, SExp] {
     let cost = PATH_LOOKUP_BASE_COST;
     cost += PATH_LOOKUP_COST_PER_LEG;
     if(sexp.nullp()){
@@ -129,7 +129,7 @@ export function run_program(
     
     const operator = sexp.first();
     if(isCons(operator)){
-      const pair = operator.as_pair() as Tuple<SExp, SExp>;
+      const pair = operator.as_pair() as [SExp, SExp];
       const [new_operator, must_be_nil] = pair;
       if(new_operator.pair || !Bytes.NULL.equal_to(must_be_nil.atom)){
         throw new EvalError("in ((X)...) syntax X must be lone atom", sexp);

@@ -319,23 +319,24 @@ export function repr(x: any){
   return str(x);
 }
 
-export class Tuple<T1, T2> extends Array<any> {
+class _Tuple<T1, T2> extends Array<any> {
   public constructor(...items: [T1, T2]) {
     super(...items);
     Object.freeze(this);
     return this;
   }
-  
+
   public toString(){
     return `(${this[0]}, ${this[1]})`;
   }
 }
+export type Tuple<T1, T2> = [T1, T2];
 
-export function t<T1, T2>(v1: T1, v2: T2){
-  return new Tuple(v1, v2);
+export function t<T1, T2>(v1: T1, v2: T2): [T1, T2] {
+  return new _Tuple(v1, v2) as [T1, T2];
 }
 
-export function isTuple(v: unknown): v is Tuple<unknown, unknown> {
+export function isTuple(v: unknown): v is [any, any] {
   return v instanceof Array && Object.isFrozen(v) && v.length === 2;
 }
 
@@ -503,7 +504,7 @@ export function modulo(a: bigint, b: bigint): bigint {
   return a - b*div;
 }
 
-export function divmod(a: bigint, b: bigint): Tuple<bigint, bigint> {
+export function divmod(a: bigint, b: bigint): [bigint, bigint] {
   const div = division(a, b);
   return t(div, a - b*div);
 }

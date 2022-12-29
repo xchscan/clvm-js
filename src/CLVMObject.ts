@@ -1,10 +1,10 @@
 import {None, Optional} from "./__python_types__";
-import {Bytes, isTuple, Tuple} from "./__type_compatibility__";
+import {Bytes, isTuple} from "./__type_compatibility__";
 import {EvalError} from "./EvalError";
 
 export type CLVMType = {
   atom: Optional<Bytes>;
-  pair: Optional<Tuple<any, any>>;
+  pair: Optional<[any, any]>;
 };
 export type Atom = {
   atom: Bytes;
@@ -12,7 +12,7 @@ export type Atom = {
 };
 export type Cons = {
   atom: None;
-  pair: Tuple<any, any>;
+  pair: [any, any];
 };
 
 /*
@@ -21,7 +21,7 @@ export type Cons = {
  */
 export class CLVMObject implements CLVMType {
   private readonly _atom: Optional<Bytes> = None;
-  private readonly _pair: Optional<Tuple<any, any>> = None;
+  private readonly _pair: Optional<[any, any]> = None;
   
   get atom(){
     return this._atom;
